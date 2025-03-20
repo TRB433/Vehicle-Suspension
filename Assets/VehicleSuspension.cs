@@ -23,20 +23,28 @@ public class test : MonoBehaviour
     public GameObject body;
     public GameObject[] wheels;
 
+    private Vector2 lastForwardVelocity;
+    private Vector2 forwardAcceleration;
+
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
         rb = transform.GetChild(0).GetComponent<Rigidbody>();
         thisRb = GetComponent<Rigidbody>();
+
+        forwardAcceleration = Vector2.zero;
+        lastForwardVelocity = Vector2.zero;
     }
 
     // Update is called once per frame
     void FixedUpdate()
     {        
-
         GetInput();
         rb.AddForce(transform.forward * speed);
+
+        //Moving the wheels with the body
+        //TODO: Fix wheel offsets
         foreach(GameObject wheel in wheels){
             switch(wheel.GetComponent<WheelType>().wheelType){
                 case WheelType.WheelPosition.LeftFront:
@@ -56,21 +64,43 @@ public class test : MonoBehaviour
         
         ApplySuspensionForce();            
         
-        ApplyDamping();                     
+        ApplyDamping();      
+
+        ApplyRotationalForce();
     }
 
+    //Increases the speed of the vehicle, taking into account the torque
     void GetInput(){
         if(Input.GetKey(KeyCode.W)){
-            speed += Time.deltaTime * torque;
-            //rb.AddTorque(-transform.right * (torque - (speed / 100)));
+            speed += Time.deltaTime * torque;                
         }
         if(Input.GetKey(KeyCode.S)){
             speed -= Time.deltaTime * torque;
         }        
     }
 
-    void ApplyRotationalForce(){
-        rb.AddTorque(-transform.right * speed);
+    //Forward/Backward body rotation when accelerating/decelerating
+    void ApplyRotationalForce(){       
+        //Calculating the acceleration of the vehicle
+        forwardAcceleration = new Vector2(rb.linearVelocity.x, rb.linearVelocity.z) - lastForwardVelocity;
+        lastForwardVelocity = new Vector2(rb.linearVelocity.x, rb.linearVelocity.z);        
+
+        //Applying torque to the body when accelerating/decelerating
+        //Only applies when the body is not already rotated too much
+        if(body.transform.rotation.x > -0.05f && (forwardAcceleration.x > 0.0f || forwardAcceleration.y > 0.0f)){
+            rb.AddTorque(-transform.right * forwardAcceleration.magnitude * 3.0f, ForceMode.Impulse);
+        }
+        else if(body.transform.rotation.x < 0.05f && (forwardAcceleration.x < 0.0f || forwardAcceleration.y < 0.0f)){
+            rb.AddTorque(transform.right * forwardAcceleration.magnitude * 3.0f, ForceMode.Impulse);
+        }
+
+        //Constantly applying a torque in the opposite direction that it is currently rotating so it naturally corrects itself
+        if(body.transform.rotation.x < 0.0f){
+            rb.AddTorque(transform.right * 7.5f);
+        }
+        else{
+            rb.AddTorque(-transform.right * 7.5f);
+        }
     }
 
     void ApplySuspensionForce(){
