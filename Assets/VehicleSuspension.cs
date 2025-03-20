@@ -22,6 +22,7 @@ public class test : MonoBehaviour
     [Header("Vehicle Parts")]
     public GameObject body;
     public GameObject[] wheels;
+    public GameObject[] sides;
 
     private Vector2 lastForwardVelocity;
     private Vector2 forwardAcceleration;
@@ -66,7 +67,9 @@ public class test : MonoBehaviour
         
         ApplyDamping();      
 
-        ApplyRotationalForce();
+        ApplyRotationalForce();      
+
+        BodyRotation();
     }
 
     //Increases the speed of the vehicle, taking into account the torque
@@ -88,18 +91,18 @@ public class test : MonoBehaviour
         //Applying torque to the body when accelerating/decelerating
         //Only applies when the body is not already rotated too much
         if(body.transform.rotation.x > -0.05f && (forwardAcceleration.x > 0.0f || forwardAcceleration.y > 0.0f)){
-            rb.AddTorque(-transform.right * forwardAcceleration.magnitude * 3.0f, ForceMode.Impulse);
+            rb.AddTorque(-transform.right * forwardAcceleration.magnitude * 4.0f, ForceMode.Impulse);
         }
         else if(body.transform.rotation.x < 0.05f && (forwardAcceleration.x < 0.0f || forwardAcceleration.y < 0.0f)){
-            rb.AddTorque(transform.right * forwardAcceleration.magnitude * 3.0f, ForceMode.Impulse);
+            rb.AddTorque(transform.right * forwardAcceleration.magnitude * 4.0f, ForceMode.Impulse);
         }
 
         //Constantly applying a torque in the opposite direction that it is currently rotating so it naturally corrects itself
         if(body.transform.rotation.x < 0.0f){
-            rb.AddTorque(transform.right * 7.5f);
+            rb.AddTorque(transform.right * 5f);
         }
         else{
-            rb.AddTorque(-transform.right * 7.5f);
+            rb.AddTorque(-transform.right * 5f);
         }
     }
 
@@ -124,9 +127,42 @@ public class test : MonoBehaviour
         }                                                                
     }
 
+    //Rotates body based on the distance from each wheel
+    void BodyRotation(){
+        //Calculating the average distance from each side of wheels to the sides of the body
+        float averageDistanceFromRightWheels = 0;
+        float averageDistanceFromLeftWheels = 0;
+        float averageDistanceFromFrontWheels = 0;
+        float averageDistanceFromRearWheels = 0;
+
+        averageDistanceFromRightWheels += Vector3.Distance(wheels[1].transform.position, sides[2].transform.position);
+        averageDistanceFromRightWheels += Vector3.Distance(wheels[2].transform.position, sides[2].transform.position);
+        averageDistanceFromRightWheels /= 2;
+
+        averageDistanceFromLeftWheels += Vector3.Distance(wheels[0].transform.position, sides[3].transform.position);
+        averageDistanceFromLeftWheels += Vector3.Distance(wheels[3].transform.position, sides[3].transform.position);
+        averageDistanceFromLeftWheels /= 2;
+
+        averageDistanceFromFrontWheels += Vector3.Distance(wheels[0].transform.position, sides[0].transform.position);
+        averageDistanceFromFrontWheels += Vector3.Distance(wheels[1].transform.position, sides[0].transform.position);
+        averageDistanceFromFrontWheels /= 2;
+        
+        averageDistanceFromRearWheels += Vector3.Distance(wheels[2].transform.position, sides[1].transform.position);
+        averageDistanceFromRearWheels += Vector3.Distance(wheels[3].transform.position, sides[1].transform.position);
+        averageDistanceFromRearWheels /= 2;
+
+        //Applying a torque to the body based on the distance from each side of wheels to the sides of the body
+        rb.AddTorque(-transform.right * (1.0f - (averageDistanceFromFrontWheels * 0.6f)), ForceMode.Impulse);
+        rb.AddTorque(transform.right * (1.0f - (averageDistanceFromRearWheels * 0.6f)), ForceMode.Impulse);
+        rb.AddTorque(new Vector3(0, 0, 1) * (1.0f - (averageDistanceFromRightWheels * 0.6f)), ForceMode.Impulse);
+        rb.AddTorque(new Vector3(0, 0, -1) * (1.0f - (averageDistanceFromLeftWheels * 0.6f)), ForceMode.Impulse);
+        
+    }
+
     //How much the suspension absorbs impact
     //A lower damping value absorbs less impact, this is emulated by applying a greater force in the opposite direction of the velocity
     void ApplyDamping(){
         rb.AddForce(-rb.linearVelocity / damping);
+        rb.AddTorque(-rb.angularVelocity / damping);
     }
 }
