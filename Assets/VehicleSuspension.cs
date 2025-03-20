@@ -17,6 +17,7 @@ public class test : MonoBehaviour
 
     //The body of the vehicle's rigidbody
     private Rigidbody rb;
+    private Rigidbody thisRb;
 
     [Header("Vehicle Parts")]
     public GameObject body;
@@ -27,11 +28,32 @@ public class test : MonoBehaviour
     void Start()
     {
         rb = transform.GetChild(0).GetComponent<Rigidbody>();
+        thisRb = GetComponent<Rigidbody>();
     }
 
     // Update is called once per frame
     void FixedUpdate()
     {        
+
+        GetInput();
+        rb.AddForce(transform.forward * speed);
+        foreach(GameObject wheel in wheels){
+            switch(wheel.GetComponent<WheelType>().wheelType){
+                case WheelType.WheelPosition.LeftFront:
+                    wheel.transform.position = new Vector3(body.transform.position.x + wheel.GetComponent<WheelType>().LeftFrontOffset.x, wheel.transform.position.y, body.transform.position.z + wheel.GetComponent<WheelType>().LeftFrontOffset.y);
+                    break;
+                case WheelType.WheelPosition.RightFront:
+                    wheel.transform.position = new Vector3(body.transform.position.x + wheel.GetComponent<WheelType>().RightFrontOffset.x, wheel.transform.position.y, body.transform.position.z + wheel.GetComponent<WheelType>().RightFrontOffset.y);
+                    break;
+                case WheelType.WheelPosition.LeftRear:
+                    wheel.transform.position = new Vector3(body.transform.position.x + wheel.GetComponent<WheelType>().LeftRearOffset.x, wheel.transform.position.y, body.transform.position.z + wheel.GetComponent<WheelType>().LeftRearOffset.y);
+                    break;
+                case WheelType.WheelPosition.RightRear:
+                    wheel.transform.position = new Vector3(body.transform.position.x + wheel.GetComponent<WheelType>().RightRearOffset.x, wheel.transform.position.y, body.transform.position.z + wheel.GetComponent<WheelType>().RightRearOffset.y);
+                    break;
+            }
+        }
+        
         ApplySuspensionForce();            
         
         ApplyDamping();                     
@@ -40,7 +62,7 @@ public class test : MonoBehaviour
     void GetInput(){
         if(Input.GetKey(KeyCode.W)){
             speed += Time.deltaTime * torque;
-            rb.AddTorque(-transform.right * (torque - (speed / 100)));
+            //rb.AddTorque(-transform.right * (torque - (speed / 100)));
         }
         if(Input.GetKey(KeyCode.S)){
             speed -= Time.deltaTime * torque;
