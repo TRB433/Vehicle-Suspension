@@ -16,5 +16,19 @@ public class WheelType : MonoBehaviour
     public Vector2 LeftRearOffset = new Vector2(-0.75f, -0.4f);
     [HideInInspector]
     public Vector2 RightRearOffset = new Vector2(0.75f, -0.4f);
+
+    private LineRenderer suspensionLine;
+
+    public GameObject suspensionPoint;
+
+    void Start(){
+        suspensionLine = GetComponent<LineRenderer>();
+    }
+
+    //Draws a line from the wheel to the body of the car to visualise the spring    
+    void Update(){
+        suspensionLine.SetPosition(0, transform.position);
+        suspensionLine.SetPosition(1, suspensionPoint.transform.position);
+    }
     
 }

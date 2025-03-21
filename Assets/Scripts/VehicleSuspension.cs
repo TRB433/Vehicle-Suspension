@@ -49,16 +49,16 @@ public class test : MonoBehaviour
         foreach(GameObject wheel in wheels){
             switch(wheel.GetComponent<WheelType>().wheelType){
                 case WheelType.WheelPosition.LeftFront:
-                    wheel.transform.position = new Vector3(body.transform.position.x + wheel.GetComponent<WheelType>().LeftFrontOffset.x, wheel.transform.position.y, body.transform.position.z + wheel.GetComponent<WheelType>().LeftFrontOffset.y);
+                    wheel.transform.position = new Vector3(body.transform.position.x + wheel.GetComponent<WheelType>().LeftFrontOffset.x * 1.5f, wheel.transform.position.y, body.transform.position.z + wheel.GetComponent<WheelType>().LeftFrontOffset.y * 6);
                     break;
                 case WheelType.WheelPosition.RightFront:
-                    wheel.transform.position = new Vector3(body.transform.position.x + wheel.GetComponent<WheelType>().RightFrontOffset.x, wheel.transform.position.y, body.transform.position.z + wheel.GetComponent<WheelType>().RightFrontOffset.y);
+                    wheel.transform.position = new Vector3(body.transform.position.x + wheel.GetComponent<WheelType>().RightFrontOffset.x * 1.5f, wheel.transform.position.y, body.transform.position.z + wheel.GetComponent<WheelType>().RightFrontOffset.y * 6);
                     break;
                 case WheelType.WheelPosition.LeftRear:
-                    wheel.transform.position = new Vector3(body.transform.position.x + wheel.GetComponent<WheelType>().LeftRearOffset.x, wheel.transform.position.y, body.transform.position.z + wheel.GetComponent<WheelType>().LeftRearOffset.y);
+                    wheel.transform.position = new Vector3(body.transform.position.x + wheel.GetComponent<WheelType>().LeftRearOffset.x * 1.5f, wheel.transform.position.y, body.transform.position.z + wheel.GetComponent<WheelType>().LeftRearOffset.y * 6);
                     break;
                 case WheelType.WheelPosition.RightRear:
-                    wheel.transform.position = new Vector3(body.transform.position.x + wheel.GetComponent<WheelType>().RightRearOffset.x, wheel.transform.position.y, body.transform.position.z + wheel.GetComponent<WheelType>().RightRearOffset.y);
+                    wheel.transform.position = new Vector3(body.transform.position.x + wheel.GetComponent<WheelType>().RightRearOffset.x * 1.5f, wheel.transform.position.y, body.transform.position.z + wheel.GetComponent<WheelType>().RightRearOffset.y * 6);
                     break;
             }
         }
@@ -152,10 +152,10 @@ public class test : MonoBehaviour
         averageDistanceFromRearWheels /= 2;
 
         //Applying a torque to the body based on the distance from each side of wheels to the sides of the body
-        rb.AddTorque(-transform.right * (1.0f - (averageDistanceFromFrontWheels * 0.6f)), ForceMode.Impulse);
-        rb.AddTorque(transform.right * (1.0f - (averageDistanceFromRearWheels * 0.6f)), ForceMode.Impulse);
-        rb.AddTorque(new Vector3(0, 0, 1) * (1.0f - (averageDistanceFromRightWheels * 0.6f)), ForceMode.Impulse);
-        rb.AddTorque(new Vector3(0, 0, -1) * (1.0f - (averageDistanceFromLeftWheels * 0.6f)), ForceMode.Impulse);
+        rb.AddTorque(-transform.right * (1.0f - (averageDistanceFromFrontWheels * 3.0f)), ForceMode.Impulse);
+        rb.AddTorque(transform.right * (1.0f - (averageDistanceFromRearWheels * 3.0f)), ForceMode.Impulse);
+        rb.AddTorque(new Vector3(0, 0, 1) * (1.0f - (averageDistanceFromRightWheels * 3.0f)), ForceMode.Impulse);
+        rb.AddTorque(new Vector3(0, 0, -1) * (1.0f - (averageDistanceFromLeftWheels * 3.0f)), ForceMode.Impulse);
         
     }
 
