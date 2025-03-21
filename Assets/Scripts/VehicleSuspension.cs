@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.UI;
 
 public class test : MonoBehaviour
 {
@@ -27,6 +28,11 @@ public class test : MonoBehaviour
     private Vector2 lastForwardVelocity;
     private Vector2 forwardAcceleration;
 
+    [Header("Vehicle Configuration UI")]
+    public Slider torqueSlider;
+    public Slider softnessSlider;
+    public Slider dampingSlider;
+
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
@@ -42,10 +48,19 @@ public class test : MonoBehaviour
     void FixedUpdate()
     {        
         GetInput();
+
+        ApplySuspensionForce();            
+        
+        ApplyDamping();      
+
+        ApplyRotationalForce();      
+
+        BodyRotation();
+
+        //Moving the vehicle forward
         rb.AddForce(transform.forward * speed);
 
-        //Moving the wheels with the body
-        //TODO: Fix wheel offsets
+        //Moving the wheels with the body        
         foreach(GameObject wheel in wheels){
             switch(wheel.GetComponent<WheelType>().wheelType){
                 case WheelType.WheelPosition.LeftFront:
@@ -62,14 +77,12 @@ public class test : MonoBehaviour
                     break;
             }
         }
-        
-        ApplySuspensionForce();            
-        
-        ApplyDamping();      
-
-        ApplyRotationalForce();      
-
-        BodyRotation();
+                
+        //Setting the values of variables to the slider value
+        //Allows for real-time tuning of the vehicle
+        torque = torqueSlider.value;
+        stiffness = softnessSlider.value;
+        damping = dampingSlider.value;
     }
 
     //Increases the speed of the vehicle, taking into account the torque
